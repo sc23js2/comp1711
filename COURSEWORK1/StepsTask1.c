@@ -11,6 +11,8 @@ typedef struct {
 
 // Define any additional variables here
 
+    FITNESS_DATA data[100];
+    
 
 
 // This is your helper function. Do not change it in any way.
@@ -23,7 +25,8 @@ void tokeniseRecord(const char *input, const char *delimiter,
     
     // Tokenize the copied string
     char *token = strtok(inputCopy, delimiter);
-    if (token != NULL) {        strcpy(date, token);
+    if (token != NULL) {        
+        strcpy(date, token);
     }
     
     token = strtok(NULL, delimiter);
@@ -43,30 +46,31 @@ void tokeniseRecord(const char *input, const char *delimiter,
 
 // Complete the main function
 int main() {
-
+   
     char filename[50] = "FitnessData_2023.csv";
-
-    FITNESS_DATA data[100];
     FILE *file = fopen(filename, "r");
 
-    if (file == NULL) {//if theres a problem with the file
-        perror(""); //print last known error
-        return 1; //return 1 indicates error
+
+    if (file == NULL) { //if theres a problem with the file
+        perror(""); 
+        return 1; //indicates error
     }
 
     int num_of_lines = 0;
-    int buffer_size = 25;
+    int buffer_size = 30;
     char line_buffer[buffer_size];
 
-    char datebuffer[10], timebuffer[5], stepsbuffer[10];
+    char datebuffer[11], timebuffer[6], stepsbuffer[7];
 
     while (fgets(line_buffer, buffer_size, file) != NULL)
     {
         tokeniseRecord(line_buffer, ",", datebuffer, timebuffer, stepsbuffer);
+        
         strcpy(data[num_of_lines].date, datebuffer);
         strcpy(data[num_of_lines].time, timebuffer);
-        int stepsbuffer2 = atoi(stepsbuffer);
-        scanf(data[num_of_lines].steps, stepsbuffer2);
+        data[num_of_lines].steps = atoi(stepsbuffer); 
+        // ^^ converts from char bc tokenizeRecord takes a char but FITNESS_DATA stores an int
+
         num_of_lines++;
     }
 
@@ -74,8 +78,7 @@ int main() {
 
     for (int i = 0; i < 3; i++)
     {
-        
-       fprintf("%s/%s/%d", data[i].date, data[i].time, &data[i].steps);
+        printf("%s/%s/%d\n", data[i].date, data[i].time, data[i].steps);
     }
 
     fclose(file);

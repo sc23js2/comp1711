@@ -2,15 +2,24 @@
 #include <stdlib.h>
 #include <string.h>
 #include "FitnessDataStruct.h"
+
+#include <math.h> //for rounding
 #include <ctype.h>  // to use toupper() function.
-#include <stdbool.h>
+#include <stdbool.h> //for boolean
+
 // Struct moved to header file
+
+
+//compile comand
+// gcc FitnessDataStruct.h StepCounter_Final.c -o StepsTask2 -lm
+
 
 // Define any additional variables here
 // Global variables for filename and FITNESS_DATA array
 char filename[50] = "FitnessData_2023.csv";
 FILE *file;
 FITNESS_DATA data[100];
+int num_of_lines = 0;
 
 // This is your helper function. Do not change it in any way.
 // Inputs: character array representing a row; the delimiter character
@@ -50,13 +59,13 @@ void displayMenu()
     printf("D: Find the data and time of the timeslot with the largest number of steps\n");
     printf("E: Find the mean step count of all the records in the file\n");
     printf("F: Find the longest continuous period where the step count is above 500 steps\n");
-    printf("Q: Quit\n\n");
+    printf("Q: Quit\n");
 }
 
 bool openFile(){
 
     printf("Input filename: ");
-   // scanf("%s", filename); // change this afterwards !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    scanf("%s", filename);
     
     file = fopen(filename, "r");
 
@@ -67,7 +76,6 @@ bool openFile(){
         return false; //indicates error
     }
 
-    int num_of_lines = 0;
     int buffer_size = 30;
     char line_buffer[buffer_size];
 
@@ -81,7 +89,7 @@ bool openFile(){
         strcpy(data[num_of_lines].time, timebuffer);
         data[num_of_lines].steps = atoi(stepsbuffer); 
         // ^^ converts from char bc tokenizeRecord takes a char but FITNESS_DATA stores an int
-
+      
         num_of_lines++;
     }
     fclose;
@@ -90,43 +98,99 @@ bool openFile(){
 
 void numOfFileLines(){
 
-    int num_of_lines;
-
-    for (int i = 0; i< sizeof(data); i++ )
-    {
-        num_of_lines++;
-    }
     printf("Total records: %d\n", num_of_lines);
-
 }
 
-bool checkIfFileOpen()
-{
-    if (file == NULL)
-    {
-        return false;
+void fewestSteps() {
+    int fewestPosition = 0;
+
+    for (int i=0; i < num_of_lines; i++){
+        if (data[i].steps < data[fewestPosition].steps)
+        {
+            fewestPosition = i;
+        }
     }
-    else
-    return true;
+
+    printf("Fewest Steps: %s, %s\n", data[fewestPosition].date, data[fewestPosition].time);
+}
+
+void mostSteps() {
+   int mostPosition = 0;
+
+    for (int i=0; i < num_of_lines; i++){
+        if (data[i].steps > data[mostPosition].steps)
+        {
+            mostPosition = i;
+        }
+    }
+
+    printf("Largest Steps: %s %s\n", data[mostPosition].date, data[mostPosition].time);   
+}
+
+int meanStepCount(){
+    float mean = 0;
+
+    for (int i =0; i < num_of_lines; i++){
+        mean += data[i].steps;
+    }
+
+    mean = mean/num_of_lines;
+
+   printf("Mean step count: %g\n", round(mean));
+}
+
+void longest500period(){
+    int startPos = -1, endPos = -1, longestPeriod = 0;
+    int tempStartPos = -1, tempLength = 0;
+
+    for (int i = 0; i < num_of_lines; i++)
+    {
+        if (tempStartPos ==-1) //tempStartPos resets everytime a 500 period ends
+        {
+            if (data[i].steps >= 500 ) //detects when 500 period starts
+            {
+                tempStartPos = i; //gets position where 500 starts
+            }
+        }
+        else //we are in a 500 period
+        {
+            if (data[i].steps >= 500){ //while were still in the period
+                tempLength ++;
+            }
+            else //we have left the period
+            {
+                if (tempLength > longestPeriod) //if this period is longer than the currently stored one
+                {
+                    longestPeriod = tempLength;
+                    startPos = tempStartPos;
+                    endPos = i-1; //gets pos of previous entry because current entry is where steps is less than 500.
+
+                    tempStartPos = -1; //reset temporary values
+                    tempLength = 0;
+                }
+            }
+        }
+    }
+
+    printf("Longest period start: %s %s\n", data[startPos].date, data[startPos].time);
+    printf("Longest period end: %s %s\n", data[endPos].date, data[endPos].time);
+
 }
 
 // Complete the main function
 int main() {
 
     char option = 'X';
-    bool quit = false;
 
-    while (quit == false)
+    while (true)
     {
         displayMenu();
-        option = 'X';
+        printf("Choose an option: ");
 
-        while(option=='X'){
-            printf("Choose an option: ");
-            option = getchar();
-            option = toupper(option);
-            printf("\n");
-        }
+        option  = getchar();
+
+        while (getchar() != '\n');
+        option = toupper(option);
 
         switch(option)
         {
@@ -135,7 +199,7 @@ int main() {
                int valid = openFile();
                if (valid == false)
                {
-                    quit = true;
+                    return 1;
                }
                else
                printf("\nFile opened successfully.\n");
@@ -144,38 +208,43 @@ int main() {
             
             case 'B':
             {
-                printf("BBBBBBBB");
                 numOfFileLines();
             }
             break;
 
             case 'C':
             {
-
+                fewestSteps();
             }
             break;
 
             case 'D':
             {
-
+                mostSteps();
             }
             break;
 
             case 'E':
             {
-                
+                meanStepCount();
             }
             break;
 
             case 'F':
             {
-
+                longest500period();
             }
             break;
 
             case 'Q':
             {
-                quit = true;
+                return 0;
+            }
+            break;
+
+            default:
+            {
+                printf("Invalid choice. Try again.\n");
             }
             break;
         }

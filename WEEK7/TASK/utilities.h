@@ -73,14 +73,19 @@ FILE *open_file(char *filename, char *mode)
  * @param dataArray the array of readings
  * @return int Returns the number of readings from the file
  */
+
+
+    char line[buffer_size];
+    char filename[buffer_size];
+
 int read_file(FILE *inputFile, reading *dataArray)
 {
-                counter = 0;
-            while (fgets(line, buffer_size, input))
+    int counter = 0;
+            while (fgets(line, buffer_size, inputFile))
             {
                 // split up the line and store it in the right place
                 // using the & operator to pass in a pointer to the bloodIron so it stores it
-                tokeniseRecord(line, ",", daily_readings[counter].date, &daily_readings[counter].bloodIron);
+                tokeniseRecord(line, ",", dataArray[counter].date, &dataArray[counter].bloodIron);
                 counter++;
             }
 
@@ -162,15 +167,15 @@ void monthly_iron(reading* dataArray, int numReadings)
     char month[3];
     printf("What month do you want to view?: ");
     scanf("%s", month);
-    month = toupper(month);
-    char readingMonth[3];
     
+    month[strspn(month, "\n")] = 0;
     for (int i=0; i< numReadings; i++)
     {
-        strcpy(readingMonth, 3, 5, dataArray[i].date);
-        if (readingMonth == month){
-            printf("%s - Blood iron: %.1f\n", daily_readings[i].date, daily_readings[i].bloodIron);
+        if(strstr(dataArray[i].date, month));
+        {
+            printf("%s - Blood iron: %.1f\n", dataArray[i].date, dataArray[i].bloodIron);
         }
+
     }
 
 }
