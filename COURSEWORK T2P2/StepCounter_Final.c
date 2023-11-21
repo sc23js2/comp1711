@@ -242,11 +242,7 @@ int main() {
             }
             break;
 
-            default:
-            {
-                printf("Invalid choice. Try again.\n");
-            }
-            break;
+            
         }
     }
 
